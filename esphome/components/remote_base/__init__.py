@@ -821,13 +821,39 @@ def coolix_dumper(var, config):
 
 
 # Denon
+DenonData, DenonBinarySensor, DenonTrigger, _, DenonDumper = declare_protocol("Denon")
 DENON_SCHEMA = cv.Schema(
     {
         cv.Required(CONF_ADDRESS): cv.int_range(min=0, max=31),
         cv.Required(CONF_COMMAND): cv.uint8_t,
     }
 )
-DenonData, DenonBinarySensor, DenonTrigger, _, DenonDumper = register_simple_protocol(
+
+
+@register_binary_sensor("denon", DenonBinarySensor, DENON_SCHEMA)
+def denon_binary_sensor(var, config):
+    cg.add(
+        var.set_data(
+            cg.StructInitializer(
+                DenonData,
+                ("address", config[CONF_ADDRESS]),
+                ("command", config[CONF_COMMAND]),
+            )
+        )
+    )
+
+
+@register_trigger("denon", DenonTrigger, DenonData)
+def denon_trigger(var, config):
+    pass
+
+
+@register_dumper("denon", DenonDumper)
+def denon_dumper(var, config):
+    pass
+
+
+register_protocol_action(
     "denon",
     "Denon",
     DENON_SCHEMA,
